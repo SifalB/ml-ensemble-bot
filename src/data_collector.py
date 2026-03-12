@@ -123,7 +123,7 @@ class SyntheticDataGenerator:
             S[t] = S[t-1] * np.exp((mu - 0.5 * sigma**2) * dt + sigma * dW[t])
         
         # Create OHLCV
-        timestamps = pd.date_range(start='2020-01-01', periods=N, freq='1H')
+        timestamps = pd.date_range(start='2020-01-01', periods=N, freq='h')
         
         df = pd.DataFrame({
             'timestamp': timestamps,

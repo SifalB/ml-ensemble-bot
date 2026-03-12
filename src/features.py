@@ -93,7 +93,11 @@ class FeatureEngineer:
         data['Stoch_D'] = stoch.stoch_signal()
         
         # ===== CCI (Commodity Channel Index) =====
-        data['CCI'] = ta.momentum.cci(data['high'], data['low'], data['close'], window=20)
+        # Calculate manually: (Close - SMA) / (0.015 * Mean Deviation)
+        typical_price = (data['high'] + data['low'] + data['close']) / 3
+        sma = typical_price.rolling(20).mean()
+        mad = typical_price.rolling(20).apply(lambda x: (x - x.mean()).abs().mean())
+        data['CCI'] = (typical_price - sma) / (0.015 * (mad + 1e-8))
         
         # ===== Normalized price position =====
         data['Close_Min_20'] = data['close'].rolling(20).min()
@@ -101,7 +105,7 @@ class FeatureEngineer:
         data['Price_Position'] = (data['close'] - data['Close_Min_20']) / (data['Close_Max_20'] - data['Close_Min_20'] + 1e-8)
         
         # Fill NaN values
-        data = data.fillna(method='bfill').fillna(method='ffill')
+        data = data.bfill().ffill()
         
         return data
     
@@ -121,18 +125,18 @@ class FeatureEngineer:
         return obv
     
     def get_feature_names(self) -> list:
-        """Return list of all feature names."""
+        """Return list of all feature names (32 features)."""
         return [
             'MA_10', 'MA_20', 'MA_30', 'MA_50',
             'Momentum_5', 'Momentum_20', 'Momentum_Ratio',
             'RSI', 'MACD', 'MACD_Signal', 'MACD_Diff',
-            'BB_Upper', 'BB_Lower', 'BB_Width', 'BB_Position',
+            'BB_Width', 'BB_Position', 'BB_Lower',
             'Volatility_10', 'Volatility_20', 'Volatility_30',
             'Volume_MA_10', 'Volume_Ratio', 'OBV', 'OBV_MA',
             'Returns_1', 'Returns_5', 'Returns_20',
             'Return_Std_10', 'Return_Std_20',
             'ADX', 'ATR', 'Stoch_K', 'Stoch_D', 'CCI',
-            'Close_Min_20', 'Close_Max_20', 'Price_Position'
+            'Price_Position'
         ]
     
     def normalize_features(self, train_df: pd.DataFrame, test_df: pd.DataFrame) -> Tuple:

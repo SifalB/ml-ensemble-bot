@@ -132,10 +132,12 @@ class LSTMEnsembleModel:
         ])
         
         # predictions shape: (n_samples, batch_size, 1)
-        predictions = predictions.squeeze()  # Remove last dim if needed
+        # Remove the last singleton dimension: (n_samples, batch_size)
+        predictions = predictions[:, :, 0]
         
-        mean = predictions.mean(axis=0)
-        std = predictions.std(axis=0)
+        # Calculate mean and std across samples (axis 0)
+        mean = predictions.mean(axis=0)  # shape: (batch_size,)
+        std = predictions.std(axis=0)    # shape: (batch_size,)
         
         return mean, std, predictions
     
