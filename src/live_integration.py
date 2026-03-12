@@ -53,11 +53,10 @@ class LivePolymarketIntegration:
             return self.markets_cache
         
         try:
+            # Gamma API: simple params (orderBy/order don't work as expected)
             params = {
                 'limit': limit,
-                'closed': False,  # Active markets only
-                'orderBy': 'volume24hUsd',
-                'order': 'desc'
+                'closed': 'false'  # Active markets only
             }
             
             resp = self.session.get(
